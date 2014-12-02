@@ -182,11 +182,11 @@ class MySQL
 	public function insertRow($tableName, $fieldValues) {
 		$data = $this->buildInsertQuery($fieldValues);
 		$sql = "INSERT INTO `$tableName` $data";
-		$insertId = $this->connection->query($sql);
-		if (!$insertId) {
+		$result = $this->connection->query($sql);
+		if (!$result) {
 			throw new DBException("Failed to insert SQL($sql): Error: " . $this->connection->error);
 		}
-		return $insertId;
+		return $this->connection->insert_id;
 	}
 
 	public function updateRow($tableName, $fieldValues) {
