@@ -37,7 +37,7 @@ class ManyToMany extends Relationship
 
 		// Setup a joinTable to load many-to-many
 		$joinTable = new BasicJoinTable($this->joinTable);
-		$joinTable->$joinTableSourceJoin = "mario";
+		$joinTable->$joinTableSourceJoin = null;
 		$joinTable->$joinTableTargetJoin = null;
 
 		$filter = array('eq' => array($joinTableSourceJoin => $sourceJoinValue));
