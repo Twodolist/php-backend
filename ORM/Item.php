@@ -54,7 +54,7 @@ class Item extends Entity
 	private $comments = null;
 	public function comments() {
 		if (!$this->comments) {
-			$this->comments = new ManyToMany($this, 'uuid', 'Comment', 'uuid', 'item_comments', 'itemId', 'commentId');
+			$this->comments = new ManyToMany($this, 'uuid', 'Comment', 'uuid', 'item_comments', 'itemId', 'commentId', true /* True here to cascade-delete comments */);
 		}
 		return $this->comments;
 	}
@@ -62,10 +62,21 @@ class Item extends Entity
 	private $attachments = null;
 	public function attachments() {
 		if (!$this->attachments) {
-			$this->attachments = new ManyToMany($this, 'uuid', 'Attachment', 'uuid', 'item_attachments', 'itemId', 'attachmentId');
+			$this->attachments = new ManyToMany($this, 'uuid', 'Attachment', 'uuid', 'item_attachments', 'itemId', 'attachmentId', false /* False here to prevent cascade-delete attachments */);
 		}
 		return $this->attachments;
 	}
+
+    protected function getRelationships() {
+    	return array(
+    		$this->user(),
+    		$this->parent(),
+    		$this->children(),
+    		$this->collaborators(),
+    		$this->comments(),
+    		$this->attachments()
+    		);
+    }
 
 	public function getTableName() {
 		return 'items';

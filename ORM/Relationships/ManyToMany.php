@@ -7,9 +7,10 @@ class ManyToMany extends Relationship
 	protected $joinTable = null;
 	protected $joinTableSourceJoin;
 	protected $joinTableTargetJoin;
+	protected $cascadeDelete;
 	protected $many = null;
 
-	public function __construct($source, $sourceJoin, $target, $targetJoin, $joinTable, $joinTableSourceJoin, $joinTableTargetJoin) {
+	public function __construct($source, $sourceJoin, $target, $targetJoin, $joinTable, $joinTableSourceJoin, $joinTableTargetJoin, $cascadeDelete = false) {
 		$this->source = $source;
 		$this->sourceField = $sourceJoin;
 		$this->target = $target;
@@ -17,6 +18,7 @@ class ManyToMany extends Relationship
 		$this->joinTable = $joinTable;
 		$this->joinTableSourceJoin = $joinTableSourceJoin;
 		$this->joinTableTargetJoin = $joinTableTargetJoin;
+		$this->cascadeDelete = $cascadeDelete;
 	}
 
 	protected function load($reload = false) {
@@ -32,15 +34,15 @@ class ManyToMany extends Relationship
 		$sourceJoinField = $this->sourceField;
 		$sourceJoinValue = $source->$sourceJoinField;
 
-		$joinTableSourceJoin = $this->joinTableSourceJoin;
-		$joinTableTargetJoin = $this->joinTableTargetJoin;
+		$joinTableSourceField = $this->joinTableSourceJoin;
+		$joinTableTargetField = $this->joinTableTargetJoin;
 
 		// Setup a joinTable to load many-to-many
 		$joinTable = new BasicJoinTable($this->joinTable);
-		$joinTable->$joinTableSourceJoin = null;
-		$joinTable->$joinTableTargetJoin = null;
+		$joinTable->$joinTableSourceField = null;
+		$joinTable->$joinTableTargetField = null;
 
-		$filter = array('eq' => array($joinTableSourceJoin => $sourceJoinValue));
+		$filter = array('eq' => array($joinTableSourceField => $sourceJoinValue));
 		$list = $joinTable->fetchAllFiltered($filter);
 
 		if ($list) {
@@ -70,7 +72,8 @@ class ManyToMany extends Relationship
 				$entity->fetchWithID($targetJoinValue);
 			}
 			else {
-				// use a filtered query
+				// TODO: use a filtered query
+				throw new MethodNotImplementedException("ManyToMany does not yet support items with join-field = `$targetJoinField`");
 			}
 
 			array_push($items, $entity);
@@ -112,6 +115,43 @@ class ManyToMany extends Relationship
 		catch (DBException $exception) {
 			trigger_error("Failed to save child entity in ManyToMany relationship: " . $exception->getMessage());
 		}
+	}
+
+	protected function getTargetEntityForJoinTable($joinTable) {
+		$joinTableTargetField = $this->joinTableTargetJoin;
+		$targetJoinField = $this->targetField;
+		$targetJoinValue = $joinTable->$joinTableTargetField;
+
+		$target = $this->targetInstance();
+		$filter = array('eq' => array($targetJoinField => $targetJoinValue));
+		$list = $target->fetchAllFiltered($filter, 0, 1);
+		if ($list) {
+			return array_shift($list);
+		}
+		else {
+			return false;
+		}
+	}
+
+	public function delete($entity) {
+		// TODO: Perform a reverse-lookup for the appropriate BasicJoinTable object
+		// that represents the given $entity
+	}
+
+	public function deleteAll() {
+		$this->load();
+		foreach ($this->many as $joinTable) {
+			$joinTable->delete();
+
+			if ($this->cascadeDelete) {
+				$target = $this->getTargetEntityForJoinTable($joinTable);
+				if ($target) {
+					$target->delete();
+				}
+			}
+		}
+
+		$this->many = null;
 	}
 }
 

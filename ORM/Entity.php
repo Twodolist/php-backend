@@ -88,7 +88,20 @@ class Entity
             }
         }
     }
-    
+
+    /**
+     * Must be implemented by descendants of Entity.
+     * This method should return an array with all relationship objects used by the Entity.
+     *
+     * @return array of relationship objects
+     *
+     * @throws MethodNotImplementedException
+     *
+     */
+    protected function getRelationships() {
+        throw new MethodNotImplementedException();
+    }
+
     /**
      * Fetches a single row identified by the given UUID, and fills the calling object with data from
      * the returned row.
@@ -282,7 +295,7 @@ class Entity
             if (isset($this->id) && !is_nan($this->id) && $this->id > 0) {
                 // Because we already have an id, we know this row exists.
                 $this->updatedAt = time();
-                $mysql->updateRow($table, $this->getFieldValues());
+                $mysql->updateRow($table, $this->getFieldValues(), $this->uuid);
             } else {
                 if (!$this->uuid) {
                     $this->uuid = $this->generateUUID();
@@ -296,7 +309,39 @@ class Entity
             throw $exception;
         }
     }
-    
+
+    /**
+     * Deletes the appropirate row in the table, and all associated child relationships.
+     *
+     */
+    public function delete() {
+        $table = $this->getTableName();
+        $mysql = $this->getMySQL();
+
+        try {
+            if (isset($this->id) && !is_nan($this->id) && $this->id > 0) {
+                // TODO: recursively delete all relationships
+                $relationships = $this->getRelationships();
+                foreach ($relationships as $relation) {
+                    if ($relation instanceof OneToOne) {
+                        // This is a child-side relationship so skip it
+                        continue;
+                    }
+
+                    $relation->deleteAll();
+                }
+
+                $mysql->deleteRow($table, $this->uuid);
+
+                // Unset the id, beccause the row is no longer attached
+                unset($this->id);
+            }
+        }
+        catch (DBException $exception) {
+            throw $exception;
+        }
+    }
+
     /**
      * Returns the name of the table this entity belongs to. This method MUST be overridden by
      * descendants of Entity.

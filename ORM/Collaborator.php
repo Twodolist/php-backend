@@ -27,6 +27,13 @@ class Collaborator extends Entity
 		}
 		return $this->item;
 	}
+
+    protected function getRelationships() {
+    	return array(
+    		$this->user(),
+    		$this->item()
+    		);
+    }
 }
 
 ?>

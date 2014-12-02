@@ -14,6 +14,12 @@ class Attachment extends Entity
 		return $this->user;
 	}
 
+    protected function getRelationships() {
+    	return array(
+    		$this->user()
+    		);
+    }
+
 	public function getTableName() {
 		return 'attachments';
 	}

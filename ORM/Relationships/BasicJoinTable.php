@@ -23,6 +23,10 @@ class BasicJoinTable extends Entity
 		return $result;
 	}
 
+	public function getRelationships() {
+		return array();
+	}
+
 	public function newInstance() {
 		$instance = new BasicJoinTable($this->tableName);
 		foreach ($this->data as $field => $value) {

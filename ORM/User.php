@@ -14,10 +14,16 @@ class User extends Entity
 
 	public function collaborations() {
 		if (!$this->collaborations) {
-			$this->collaborations = new OneToMany($this, 'uuid', 'ollaborator', 'userId');
+			$this->collaborations = new OneToMany($this, 'uuid', 'Collaborator', 'userId');
 		}
 		return $this->collaborations;
 	}
+
+    protected function getRelationships() {
+    	return array(
+    		$this->collaborations()
+    		);
+    }
 
 	public function getTableName() {
 		return 'users';

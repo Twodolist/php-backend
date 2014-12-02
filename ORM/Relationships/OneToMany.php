@@ -61,8 +61,17 @@ class OneToMany extends Relationship
 		}
 	}
 
-	public function remove($child) {
+	public function delete($child) {
 		throw new MethodNotImplementedException();
+	}
+
+	public function deleteAll() {
+		$entities = $this->fetchAll();
+		foreach ($entities as $entity) {
+			$entity->delete();
+		}
+
+		$this->many = null;
 	}
 
 	/**

@@ -25,6 +25,13 @@ class Comment extends Entity
 		}
 		return $this->attachment;
 	}
+
+    protected function getRelationships() {
+    	return array(
+    		$this->user(),
+    		$this->attachment()
+    		);
+    }
 }
 
 ?>

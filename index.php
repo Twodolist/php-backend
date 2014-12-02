@@ -172,9 +172,19 @@ function setupTestData() {
 		foreach($children as $child) {
 			dumpEntity($child, "Got child: " . $child->title);
 		}
+
+		// Delete the item
+		// This will cascade into deleting all children; because they're on a one-to-many relationship, the item 'owns' them.
+		$item->delete();
+
+		$items = (new Item())->fetchAll();
+		foreach ($items as $item) {
+			dumpEntity($item, "Fetched item " . $item->title);
+		}
 	}
 	catch (Exception $exception) {
 		trigger_error( "Error setup up test data: " . $exception->getMessage() );
+		throw $exception;
 	}
 }
 

@@ -189,12 +189,23 @@ class MySQL
 		return $this->connection->insert_id;
 	}
 
-	public function updateRow($tableName, $fieldValues) {
-
+	public function updateRow($tableName, $fieldValues, $uuid) {
+		$data = $this->buildUpdateQuery($fieldValues);
+		$sql = "UPDATE `$tableName` SET $data WHERE `uuid` = '" . $this->escape($uuid) ."'";
+		$result = $this->connection->query($sql);
+		if (!$result) {
+			throw new DBException("Failed to update SQL($sql): Error: " . $this->connection->error);
+		}
+		return true;
 	}
 
 	public function deleteRow($tableName, $uuid) {
-
+		$sql = "DELETE FROM `$tableName` WHERE `uuid` = '" . $this->escape($uuid) . "'";
+		$result = $this->connection->query($sql);
+		if (!$result) {
+			throw new DBException("Failed to delete SQL($sql): Error: " . $this->connection->error);
+		}
+		return true;
 	}
 
 	public function query($sql) {
