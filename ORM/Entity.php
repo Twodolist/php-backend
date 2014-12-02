@@ -23,8 +23,13 @@ class Entity
 	private $mysql = NULL;
 
     public function __construct() {
-      $this->uuid = uniqid();
+      $this->uuid = $this->generateUUID();
     }
+
+  protected function generateUUID() {
+    // TODO: Replace this with a real type2 or type4 UUID
+    return uniqid();
+  }
 
 	public function getFieldNames() {
 		$reflect = new ReflectionClass($this);
@@ -230,7 +235,7 @@ class Entity
 	     	}
 	     	else {
 	     		if (!$this->uuid) {
-	     			$this->uuid = uniqid();
+	     			$this->uuid = $this->generateUUID();
 	     		}
 	     		$this->createdAt = time();
 	     		$this->id = $mysql->insertRow($table, $this->getFieldValues());
