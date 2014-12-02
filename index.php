@@ -127,7 +127,7 @@ function setupTestData() {
 		$comment2->user()->set($user);
 		$comment2->comment = 'These are my 2 cents.';
 
-		dumpEntity($comment1, "Created comment " . $comment2->comment);
+		dumpEntity($comment2, "Created comment " . $comment2->comment);
 
 		// Add attachments to item - adding an entity to a relationship like this, persists the entity
 		$item->attachments()->add($attachment2);
@@ -137,6 +137,41 @@ function setupTestData() {
 		// Add comments to item - adding an entity to a relationship like this, persists the entity
 		$item->comments()->add($comment1);
 		$item->comments()->add($comment2);
+
+		// Create some child items
+		$child1 = new Item();
+		$child1->user()->set($user);
+		$child1->parent()->set($item);
+		$child1->title = 'Child item 1';
+		$child1->brief = 'This is the first Child item';
+		$child1->notes = 'These are some notes';
+		$child1->content = 'Content data can be used for a number of things';
+
+		$child2 = new Item();
+		$child2->user()->set($user);
+		$child2->parent()->set($item);
+		$child2->title = 'Child item 2';
+		$child2->brief = 'This is the second Child item';
+		$child2->notes = 'These are some notes';
+		$child2->content = 'Content data can be used for a number of things';
+
+		// This persists the children
+		$item->children()->add($child1);
+		$item->children()->add($child2);
+
+		// Add some attachments to child1
+		$child1->attachments()->add($attachment1);
+		$child1->attachments()->add($attachment2);
+
+		// Add some attachments to child2
+		$child2->attachments()->add($attachment2);
+		$child2->attachments()->add($attachment3);
+
+		// Test the Children one-to-many relationship
+		$children = $item->children()->fetchAll();
+		foreach($children as $child) {
+			dumpEntity($child, "Got child: " . $child->title);
+		}
 	}
 	catch (Exception $exception) {
 		trigger_error( "Error setup up test data: " . $exception->getMessage() );

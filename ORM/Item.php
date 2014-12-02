@@ -35,6 +35,14 @@ class Item extends Entity
 		return $this->parent;
 	}
 
+	protected $children = null;
+	public function children() {
+		if (!$this->children) {
+			$this->children = new OneToMany($this, 'uuid', 'Item', 'parentId');
+		}
+		return $this->children;
+	}
+
 	private $collaborators = null;
 	public function collaborators() {
 		if (!$this->collaborators) {

@@ -96,8 +96,6 @@ class ManyToMany extends Relationship
 		$targetJoinField = $this->targetField;
 		$targetJoinValue = $entity->$targetJoinField;
 
-		echo "Target Join Field: $targetJoinField = $targetJoinValue";
-
 		$joinTableSourceField = $this->joinTableSourceJoin;
 		$joinTableTargetField = $this->joinTableTargetJoin;
 

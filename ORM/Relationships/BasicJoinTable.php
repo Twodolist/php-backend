@@ -7,6 +7,7 @@ class BasicJoinTable extends Entity
 	private $uninitialized;
 
 	public function __construct($tableName) {
+		parent::__construct();
 		$this->tableName = $tableName;
 	}
 
@@ -15,7 +16,7 @@ class BasicJoinTable extends Entity
 	}
 
 	public function getFieldNames() {
-		$result = Entity::getFieldNames();
+		$result = parent::getFieldNames();
 		foreach ($this->data as $field => $value) {
 			array_push($result, $field);
 		}
