@@ -1,10 +1,5 @@
 <?php
 
-// Require exception objects
-require_once ('ConnectionException.php');
-require_once ('NotFoundException.php');
-require_once ('QueryException.php');
-
 /**
  * MySQL database manager.
  * This object relies on Exceptions to report errors, so make sure that operations are placed withing
@@ -73,9 +68,22 @@ class MySQL
 		return $instance;
 	}
 
-	public static function getMySQLInstance($name) {
+	/**
+	 * Searches for a named connection, returns the MySQL instance object associated with it if found.
+	 * Otherwise, an exception is raised.
+	 *
+	 * @return a MySQL instance representing the connection
+	 *
+	 * @throws NotFoundException if the connection is not found
+	 */
+	public static function getMySQLInstance($name, $throwsException = true) {
 		if (!isset(self::$instances[$name])) {
-			return null;
+			if ($throwsException) {
+				throw new NotFoundException("Connection($name) not found");
+			}
+			else {
+				return false;
+			}
 		}
 
 		return self::$instances[$name];
@@ -89,14 +97,25 @@ class MySQL
 	 */
 	public static function initConnections($connectionsArray) {
 		foreach ($connectionsArray as $key => $connection) {
-			$instance = self::getMySQLInstance($key);
-			if (!isset($instance)) {
+			try {
+				// If this connection is already loaded, continue
+				if (false != self::getMySQLInstance($key, false /* do not raise exceptions */ )) {
+					continue;
+				}
+
+				// Otherwise, load the connection
 				$instance = new MySQL($connection['url'], $connection['database'], $connection['user'], $connection['password']);
 				$instance->name = $key;
 				self::$instances[$key] = $instance;
 			}
-
-			return $instance;
+			catch (DBException $exception) {
+				trigger_error("Could not load Connection($key): " . $exception->getMessage());
+				throw $exception;
+			}
+			catch (Exception $exception) {
+				trigger_error("Could not load Connection($key): " . $exception->getMessage());
+				throw $exception;
+			}
 		}
 	}
 
@@ -181,7 +200,7 @@ class MySQL
 	public function query($sql) {
 		$result = $this->connection->query($sql);
 		if (!$result) {
-			throw new DBException("Query failed with SQL($sql); Error: " . $this->connection->error);
+			throw new NotFoundException("SQL($sql) returned no results");
 		}
 
 		return $result;
