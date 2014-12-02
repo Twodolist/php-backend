@@ -1,3 +1,4 @@
+DROP DATABASE `twodolist`;
 CREATE DATABASE `twodolist`;
 USE `twodolist`;
 

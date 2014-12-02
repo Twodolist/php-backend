@@ -96,12 +96,14 @@ class ManyToMany extends Relationship
 		$targetJoinField = $this->targetField;
 		$targetJoinValue = $entity->$targetJoinField;
 
-		$joinTableSourceJoin = $this->joinTableSourceJoin;
-		$joinTableTargetJoin = $this->joinTableTargetJoin;
+		echo "Target Join Field: $targetJoinField = $targetJoinValue";
+
+		$joinTableSourceField = $this->joinTableSourceJoin;
+		$joinTableTargetField = $this->joinTableTargetJoin;
 
 		$joinTable = new BasicJoinTable($this->joinTable);
-		$joinTable->$joinTableSourceJoin = $sourceJoinValue;
-		$joinTable->$joinTableTargetJoin = $targetJoinValue;
+		$joinTable->$joinTableSourceField = $sourceJoinValue;
+		$joinTable->$joinTableTargetField = $targetJoinValue;
 
 		try {
 			$source->persist();
@@ -110,7 +112,7 @@ class ManyToMany extends Relationship
 			array_push($this->many, $joinTable);
 		}
 		catch (DBException $exception) {
-			trigger_error("Failed to save child entity in OneToMany relationship");
+			trigger_error("Failed to save child entity in ManyToMany relationship: " . $exception->getMessage());
 		}
 	}
 }

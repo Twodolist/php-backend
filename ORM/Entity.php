@@ -22,6 +22,10 @@ class Entity
 
 	private $mysql = NULL;
 
+    public function __construct() {
+      $this->uuid = uniqid();
+    }
+
 	public function getFieldNames() {
 		$reflect = new ReflectionClass($this);
    	$props = $reflect->getProperties(ReflectionProperty::IS_PUBLIC);

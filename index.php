@@ -24,7 +24,7 @@ $connections = array(
 		'url' => 'localhost',
 		'user' => 'root',
 		'password' => '',
-		'database' => 'twodo'
+		'database' => 'twodolist'
 		),
 
 	'mysql-2' => array(
@@ -47,33 +47,101 @@ catch (DBException $exception) {
 }
 
 // Get the path
-
+// TODO: Call appropriate controllers based on the Request Path
 $path = ltrim($_SERVER['REQUEST_URI'], '/');
 $elements = explode('/', $path);
 
-// TODO: Call appropriate controllers based on the Request Path
+function dumpEntity($entity, $message) {
+	echo "<h2>Dumping Entity: " . get_class($entity) . "</h2>$message";
+	echo "<ul>";
+	foreach ($entity->getFieldValues() as $field => $value) {
+		echo "<li>$field: $value</li>";
+	}
+	echo "</ul>";
+}
 
-// Test the Entity object
-$user = (new User())->fetchWithID(1);
-$item = (new Item())->fetchWithID(1);
-$comment = (new Comment())->fetchWithID(1);
-$attachment = (new Attachment())->fetchWithID(1);
+// Test entity objects
+function setupTestData() {
+	try {
+		// Setup a new user
+		$user = new User();
+		$user->firstName = 'Mario';
+		$user->middleName = 'J.';
+		$user->lastName = 'Wunderlich';
+		$user->userName = 'mjwunderlich';
+		$user->persist();
 
-echo '<br />';
+		dumpEntity($user, "Created user " . $user->userName);
 
-// $item->comments()->add($comment);
-$item->attachments()->add($attachment);
+		// Create a new item
+		$item = new Item();
+		$item->user()->set($user);
+		$item->title = 'Item 1';
+		$item->brief = 'This is the first item';
+		$item->notes = 'These are some notes for the first item';
+		$item->content = 'Content data can be used for a number of things';
+		$item->persist();
 
-echo '<br />';
-echo '<br />';
+		dumpEntity($item, "Created item " . $item->title);
 
-$itemComments = $item->comments()->fetchAll();
-var_dump($itemComments[0]->getFieldValues());
+		// Create Attachments
+		// Attachments represent file attachments in the app
+		$attachment1 = new Attachment();
+		$attachment1->user()->set($user);
+		$attachment1->resource = 'https://www.mjwunderlich.com/resource-1.png';
+		$attachment1->type = 1;
 
-echo '<br />';
-echo '<br />';
+		dumpEntity($attachment1, "Created attachment " . $attachment1->resource);
 
-$itemAttachments = $item->attachments()->fetchAll();
-var_dump($itemAttachments[0]->getFieldValues());
+		$attachment2 = new Attachment();
+		$attachment2->user()->set($user);
+		$attachment2->resource = 'Applications/Data/0839827239384-3923-9734-92738472/Documents/resource-2.png';
+		$attachment2->type = 0;
 
+		dumpEntity($attachment2, "Created attachment " . $attachment2->resource);
+
+		$attachment3 = new Attachment();
+		$attachment3->user()->set($user);
+		$attachment3->resource = 'https://www.mjwunderlich.com/resource-3.png';
+		$attachment3->type = 1;
+
+		dumpEntity($attachment3, "Created attachment " . $attachment3->resource);
+
+		$attachment4 = new Attachment();
+		$attachment4->user()->set($user);
+		$attachment4->resource = 'https://www.mjwunderlich.com/resource-4.png';
+		$attachment4->type = 1;
+
+		dumpEntity($attachment4, "Created attachment " . $attachment4->resource);
+
+		// Create some comments
+		// Coments can have 1 attachment
+		$comment1 = new Comment();
+		$comment1->user()->set($user);
+		$comment1->attachment()->set($attachment1);
+		$comment1->comment = 'Funny picture...';
+
+		dumpEntity($comment1, "Created comment " . $comment1->comment);
+
+		$comment2 = new Comment();
+		$comment2->user()->set($user);
+		$comment2->comment = 'These are my 2 cents.';
+
+		dumpEntity($comment1, "Created comment " . $comment2->comment);
+
+		// Add attachments to item - adding an entity to a relationship like this, persists the entity
+		$item->attachments()->add($attachment2);
+		$item->attachments()->add($attachment3);
+		$item->attachments()->add($attachment4);
+
+		// Add comments to item - adding an entity to a relationship like this, persists the entity
+		$item->comments()->add($comment1);
+		$item->comments()->add($comment2);
+	}
+	catch (Exception $exception) {
+		trigger_error( "Error setup up test data: " . $exception->getMessage() );
+	}
+}
+
+setupTestData();
 ?>
