@@ -1,6 +1,7 @@
 <?php
 
 require_once ('Relationships/OneToMany.php');
+require_once ('Relationships/ManyToMany.php');
 
 class Item extends Entity
 {
@@ -17,13 +18,45 @@ class Item extends Entity
 	public $notes;
 	public $state;
 
-	private $itemCollaborators = null;
 
-	public function itemCollaborators() {
-		if (!$this->itemCollaborators) {
-			$this->itemCollaborators = new OneToMany('item_collaborators', $this, 'uuid', 'ItemCollaborator', 'itemId');
+	protected $user = null;
+	public function user() {
+		if (!$this->user) {
+			$this->user = new OneToOne($this, 'userId', 'User', 'uuid');
 		}
-		return $this->itemCollaborators;
+		return $this->user;
+	}
+
+	protected $parent = null;
+	public function parent() {
+		if (!$this->parent) {
+			$this->parent = new OneToOne($this, 'parentId', 'Item', 'uuid');
+		}
+		return $this->parent;
+	}
+
+	private $collaborators = null;
+	public function collaborators() {
+		if (!$this->collaborators) {
+			$this->collaborators = new OneToMany($this, 'uuid', 'Collaborator', 'itemId');
+		}
+		return $this->collaborators;
+	}
+
+	private $comments = null;
+	public function comments() {
+		if (!$this->comments) {
+			$this->comments = new ManyToMany($this, 'uuid', 'Comment', 'uuid', 'item_comments', 'itemId', 'commentId');
+		}
+		return $this->comments;
+	}
+
+	private $attachments = null;
+	public function attachments() {
+		if (!$this->attachments) {
+			$this->attachments = new ManyToMany($this, 'uuid', 'Attachment', 'uuid', 'item_attachments', 'itemId', 'attachmentId');
+		}
+		return $this->attachments;
 	}
 
 	public function getTableName() {

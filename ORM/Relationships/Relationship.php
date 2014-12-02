@@ -18,8 +18,7 @@ class Relationship
 		return new $class();
 	}
 
-	public function __construct($name, $source, $sourceField, $target, $targetField) {
-		$this->name = $name;
+	public function __construct($source, $sourceField, $target, $targetField) {
 		$this->source = $source;
 		$this->sourceField = $sourceField;
 		$this->target = $target;

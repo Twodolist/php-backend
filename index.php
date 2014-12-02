@@ -9,11 +9,14 @@ require_once ( './DB/MySQL.php' );
 
 require_once ( './ORM/Relationships/Relationship.php' );
 require_once ( './ORM/Relationships/OneToMany.php' );
+require_once ( './ORM/Relationships/OneToOne.php' );
 
 require_once ( './ORM/Entity.php' );
 require_once ( './ORM/Item.php' );
 require_once ( './ORM/User.php' );
-require_once ( './ORM/ItemCollaborator.php' );
+require_once ( './ORM/Collaborator.php' );
+require_once ( './ORM/Comment.php' );
+require_once ( './ORM/Attachment.php' );
 
 // Setup a few default connections
 $connections = array(
@@ -52,19 +55,25 @@ $elements = explode('/', $path);
 
 // Test the Entity object
 $user = (new User())->fetchWithID(1);
-
-echo '<br />';
-
 $item = (new Item())->fetchWithID(1);
-$collabs = $item->itemCollaborators()->fetchAll();
+$comment = (new Comment())->fetchWithID(1);
+$attachment = (new Attachment())->fetchWithID(1);
+
+echo '<br />';
+
+// $item->comments()->add($comment);
+$item->attachments()->add($attachment);
 
 echo '<br />';
 echo '<br />';
 
-foreach ($collabs as $collab) {
-	var_dump($collab->getFieldValues());
-	echo '<br />';
-	echo '<br />';
-}
+$itemComments = $item->comments()->fetchAll();
+var_dump($itemComments[0]->getFieldValues());
+
+echo '<br />';
+echo '<br />';
+
+$itemAttachments = $item->attachments()->fetchAll();
+var_dump($itemAttachments[0]->getFieldValues());
 
 ?>

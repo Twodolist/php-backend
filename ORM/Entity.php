@@ -24,15 +24,15 @@ class Entity
 
 	public function getFieldNames() {
 		$reflect = new ReflectionClass($this);
-     	$props = $reflect->getProperties(ReflectionProperty::IS_PUBLIC);
-     	$result = array();
-     	foreach ($props as $property) {
+   	$props = $reflect->getProperties(ReflectionProperty::IS_PUBLIC);
+   	$result = array();
+   	foreach ($props as $property) {
      		array_push($result, $property->name);
-     	}
-     	return $result;
-     }
+   	}
+   	return $result;
+   }
 
-     public function getFieldNamesAsColumnNames() {
+   public function getFieldNamesAsColumnNames() {
      	$properties = $this->getFieldNames();
      	$result = array();
      	foreach ($properties as $property) {
@@ -40,14 +40,13 @@ class Entity
      		array_push($result, $columnName);
      	}
      	return $result;
-     }
+   }
 
      public function getFieldValues() {
-		$reflect = new ReflectionClass($this);
-     	$props = $reflect->getProperties(ReflectionProperty::IS_PUBLIC);
+		  $fields = $this->getFieldNames();
      	$result = array();
-     	foreach ($props as $property) {
-     		$result[$property->name] = $property->getValue($this);
+     	foreach ($fields as $field) {
+     		$result[$field] = $this->$field;
      	}
      	return $result;
      }
@@ -87,7 +86,7 @@ class Entity
      	try {
 	     	$table = $this->getTableName();
 	     	$mysql = $this->getMySQL();
-	     	$sql = "SELECT * FROM `$table` WHERE `uuid` = " . $mysql->escape($uuid);
+	     	$sql = "SELECT * FROM `$table` WHERE `uuid` = '" . $mysql->escape($uuid) . "'";
 	     	$result = $mysql->query($sql);
 	     	$this->fillFromResultSet($result);
 
@@ -135,7 +134,11 @@ class Entity
       * @throws ConnectionException if mysql connection cannot be obtained
       */
      public function fetchAll($start = 0, $count = 0) {
-     	return $this->fetchAllFiltered(null, 0, 0);
+     	  return $this->fetchAllFiltered(null, 0, 0);
+     }
+
+     protected function newInstance() {
+        return new static;
      }
 
      public function fetchAllFiltered($filter, $start = 0, $count = 0) {
@@ -151,7 +154,7 @@ class Entity
 
 	     	$objects = array();
 	     	while ($count--) {
-	     		$object = new static;
+	     		$object = $this->newInstance();
 	     		$object->fillFromResultSet($result);
 	     		array_push($objects, $object);
 	     	}
@@ -204,7 +207,6 @@ class Entity
 	     	}
      	}
 
-     	echo 'Got filter: ' . $sql;
      	return $sql;
      }
 
@@ -217,7 +219,7 @@ class Entity
      	$mysql = $this->getMySQL();
 
      	try {
-	     	if (isset($this->id) && !is_nan($this->id) && $this-id > 0) {
+	     	if (isset($this->id) && !is_nan($this->id) && $this->id > 0) {
 	     		// Because we already have an id, we know this row exists.
 	     		$this->updatedAt = time();
 	     		$mysql->updateRow($table, $this->getFieldValues());
