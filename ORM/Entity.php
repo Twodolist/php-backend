@@ -220,9 +220,14 @@ class Entity
     {
         $sql   = '';
         $mysql = $this->getMySQL();
+        $needsComma = false;
         foreach ($filter as $key => $array) {
             
             foreach ($array as $field => $value) {
+                if ($needsComma) {
+                  $sql .= ', ';
+                }
+
                 $sql .= '`' . MySQL::columnNameFromFieldName($field) . '` ';
                 switch ($key) {
                     case 'lt':
@@ -250,7 +255,9 @@ class Entity
                         $sql .= 'IS NOT NULL';
                         break;
                 }
-                
+
+                $needsComma = true;
+
                 if ($key == 'nl' || $key == 'nn') {
                     continue;
                 }
