@@ -143,5 +143,11 @@ function setupTestData() {
 	}
 }
 
-setupTestData();
+$users = (new User())->fetchAll();
+if (empty($users)) {
+	setupTestData();
+}
+else {
+	echo "<h1>Hello world!</h1>";
+}
 ?>
